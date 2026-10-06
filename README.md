@@ -153,7 +153,6 @@ Deploy: `npm run build` and publish `dist/` to Vercel or Netlify (hash routing, 
 ## Before going live
 
 - **Supabase is untested.** The schema, access rules and client code have not been run against a live project. Try every role (resident report, barangay official, office administrator) before a demo that depends on it.
-- **Mobile app.** The earlier Flutter app used Firebase and is not connected to this backend.
 - **Sample administrator.** In local mode the account `admin` / `admin123` is created automatically. Change that password before real use.
 - **Search engines.** `index.html` has the title, description, Open Graph tags and structured data;
   `public/robots.txt` and `public/sitemap.xml` need `YOUR-DOMAIN` replaced after deployment. The app uses hash
