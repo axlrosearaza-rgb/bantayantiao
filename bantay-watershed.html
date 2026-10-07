@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bantay-Watershed</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eaf0f2;--pan:#fbfdfd;--ink:#102a33;--mut:#5a717a;--line:#cfdbe0;--river:#0f5c73;--warn:#fff4e0}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font:14px/1.45 "Public Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column}
+header{background:var(--river);color:#fff;padding:10px 16px}
+header h1{font-size:18px;margin:0}
+header p{margin:2px 0 0;font-size:12px;opacity:.85}
+main{display:grid;grid-template-columns:310px 1fr 370px;flex:1;min-height:0}
+.col{overflow:auto;background:var(--pan);border-right:1px solid var(--line)}
+.col:last-child{border-right:0;border-left:1px solid var(--line)}
+section{padding:12px 14px;border-bottom:1px solid var(--line)}
+h2{font-size:14px;margin:0 0 8px}
+.mut{color:var(--mut);font-size:13px}
+#map{height:100%;background:#d7e4e8}
+.rec{display:grid;grid-template-columns:34px 1fr;gap:8px;padding:8px 6px;border-radius:6px;cursor:pointer}
+.rec:hover,.rec.on{background:#e4eff2}
+.sc{width:34px;height:34px;border-radius:50%;color:#fff;font-weight:700;display:grid;place-items:center}
+.rec b{display:block}.rec span{font-size:12px;color:var(--mut)}
+.big{font-size:34px;font-weight:700;line-height:1}.big small{font-size:15px;margin-left:6px}
+.row{display:grid;grid-template-columns:1fr 80px 46px;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+.row em{color:var(--mut);font-style:normal}
+.bar{height:8px;background:#dde8ec;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--river)}
+.stack{display:flex;height:12px;border-radius:6px;overflow:hidden}.stack i{display:block}
+.lg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;margin-top:6px}.lg b{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
+.warn{background:var(--warn);border-left:4px solid #e67e22;padding:8px 10px;margin-top:8px;font-size:13px}
+label{display:block;font-size:13px;margin-top:8px}
+input[type=range]{width:100%}
+select,textarea,button{font:inherit;width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+textarea{height:54px;resize:vertical}
+button{cursor:pointer;background:var(--river);color:#fff;border:0;margin-top:8px;font-weight:600}
+button.alt{background:#fff;color:var(--river);border:1px solid var(--river)}
+button.link{width:auto;background:none;color:var(--river);padding:0;margin:0;font-weight:400;font-size:12px;text-decoration:underline}
+button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,summary:focus-visible,.rec:focus-visible,a:focus-visible{outline:3px solid #7cc4d6;outline-offset:1px}
+.rp{border-top:1px solid var(--line);padding:8px 0;font-size:13px}
+.rp img{height:44px;border-radius:4px;display:block;margin:4px 0}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;background:#dcebf0;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:4px 2px;text-align:left}th{color:var(--mut);font-weight:600}
+.msg{font-size:12px;color:var(--river);min-height:16px;margin-top:6px}
+.hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+summary{cursor:pointer;font-weight:700;font-size:14px}
+details p{margin:8px 0 0;font-size:13px}
+details table{margin-top:8px}
+details td:last-child,details th:last-child{text-align:right;white-space:nowrap}
+.formula{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:#eef4f6;padding:6px 8px;border-radius:6px;margin-top:8px;overflow-wrap:anywhere}
+@media(max-width:1000px){html,body{height:auto}body{display:block}main{grid-template-columns:1fr}#map{height:420px}.col{border:0}}
+</style></head><body>
+<header><h1>Bantay-Watershed</h1>
+<p>Decision support for LGUs. Prototype with sample zone data; watershed record fields follow WEMIS (Binahaan Watershed, 35,507 ha, Region VIII).</p></header>
+<main>
+<div class="col">
+<section><h2>Where to act first</h2><div id="recs"></div></section>
+<section><h2>Report a problem in the watershed</h2>
+<label>Category<select id="cat"><option>Tree cutting</option><option>Kaingin</option><option>Illegal dumping</option><option>Erosion</option><option>River obstruction</option><option>Unusual water color</option><option>Drying spring</option><option>Landslide</option><option>Encroachment</option><option>Pollution</option><option>Damaged riparian vegetation</option></select></label>
+<label>What did you see?<textarea id="desc"></textarea></label>
+<label>Photo<input type="file" id="photo" accept="image/*"></label>
+<button class="alt" id="pinbtn" type="button">Pin location on map</button>
+<button id="send" type="button">Send report</button>
+<div class="msg" id="msg" role="status"></div></section>
+<section><div class="hd"><h2>Community reports</h2><button class="link" id="reset" type="button">Restore sample reports</button></div>
+<p class="mut" style="margin:0 0 4px">Saved in this browser.</p><div id="rlist"></div></section>
+</div>
+<div id="map" role="application" aria-label="Watershed map"></div>
+<div class="col">
+<section id="detail"></section>
+<section><details id="how"><summary>How scores work</summary><div id="howbody"></div></details></section>
+<section><h2>What if we allow development here?</h2>
+<p class="mut" id="wizone"></p>
+<label>Forest converted to settlement: <b id="fsv">0</b>%<input type="range" id="fs" min="0" max="30" value="0"></label>
+<label>Forest converted to agriculture: <b id="fav">0</b>%<input type="range" id="fa" min="0" max="30" value="0"></label>
+<div id="wiout" style="margin-top:10px"></div></section>
+</div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const W={water:.25,slope:.2,veg:.2,settle:.15,hazard:.1,rep:.1};
+const LBL={water:'Water-supply importance',slope:'Steep slope',veg:'Vegetation loss',settle:'Settlement growth',hazard:'Flood and landslide susceptibility',rep:'Open community reports'};
+const COL={Critical:'#c0392b',High:'#e67e22',Moderate:'#c9a227',Low:'#2e8b57'};
+const lv=s=>s>=70?'Critical':s>=50?'High':s>=30?'Moderate':'Low';
+const ind=x=>x<40?'Low':x<60?'Moderate':'High';
+const hl=h=>h>=70?'Good':h>=50?'At risk':'Poor';
+const ACT={water:['Protect the water source: field validation and a protection zone','ENRO + Water District'],slope:['Stabilize steep slopes and restore vegetation','ENRO / CENRO'],veg:['Reforest and restore vegetation cover','ENRO / CENRO + Barangay'],settle:['Review proposed development against the CLUP and zoning','Planning Office + ENRO'],hazard:['Inspect river and hazard areas and clear obstructions','DRRMO + Barangay'],rep:['Field-validate the community reports','ENRO + Barangay']};
+const ST=['Submitted','Validating','Confirmed','Action Taken','Resolved'];
+const REP_PTS=20; /* points each open report adds to the "Open community reports" factor */
+const LN=['Forest','Agriculture','Settlement','Other'],LC=['#2e7d32','#c9a227','#c0392b','#5b8fb9'];
+/* Sample data: zone variables are 0-100 and illustrative. Replace with WEMIS / GIS inputs. */
+const P=[[[11.47,125.03],[11.465,125.09],[11.475,125.16],[11.46,125.22]],[[11.395,125.01],[11.385,125.095],[11.40,125.155],[11.39,125.225]],[[11.30,125.02],[11.305,125.09],[11.295,125.16],[11.31,125.215]]];
+const poly=(r,c)=>[P[r][c],P[r][c+1],P[r+1][c+1],P[r+1][c]];
+const Z=[
+{id:'A',name:'Water Source Zone WS-03',poly:poly(0,2),v:{water:95,slope:80,veg:75,settle:85,hazard:60},lu:[55,20,20,5],prop:'Settlement expansion (about 12 ha)',conf:'Proposed settlement expansion overlaps a high water-source protection zone.'},
+{id:'B',name:'Upper Watershed, Steep Slopes',poly:poly(0,0),v:{water:60,slope:90,veg:70,settle:20,hazard:75},lu:[70,25,3,2],prop:'Upland farm expansion',conf:'Cultivation planned on very steep slopes.'},
+{id:'C',name:'Midland Agriculture Belt',poly:poly(1,0),v:{water:45,slope:40,veg:55,settle:45,hazard:50},lu:[25,60,12,3]},
+{id:'D',name:'Lowland Settlement Edge',poly:poly(1,2),v:{water:35,slope:15,veg:40,settle:80,hazard:65},lu:[8,22,65,5],prop:'Commercial establishment',conf:'Development planned inside a flood-susceptible area.'},
+{id:'E',name:'River Corridor',poly:poly(1,1),v:{water:70,slope:25,veg:40,settle:50,hazard:90},lu:[20,30,30,20]},
+{id:'F',name:'Protected Forest Core',poly:poly(0,1),v:{water:40,slope:50,veg:10,settle:5,hazard:30},lu:[90,2,0,8]}];
+const SEED=[
+{c:'Erosion',d:'Soil slipping near the intake road',p:[11.435,125.19],s:'Confirmed'},
+{c:'Tree cutting',d:'Fresh stumps along the upper trail',p:[11.42,125.185],s:'Validating'},
+{c:'Drying spring',d:'Spring flow much lower than last month',p:[11.445,125.20],s:'Submitted'},
+{c:'River obstruction',d:'Debris blocking the channel near the bridge',p:[11.35,125.12],s:'Submitted'},
+{c:'River obstruction',d:'Fallen logs piling up downstream',p:[11.34,125.135],s:'Validating'},
+{c:'Kaingin',d:'Burned patch on the ridge',p:[11.43,125.06],s:'Submitted'}];
+/* Reports are kept in this browser's localStorage so a refresh does not wipe the demo. */
+const KEY='bantay-watershed:reports:v1';
+function loadReports(){
+ try{const s=JSON.parse(localStorage.getItem(KEY));
+  if(Array.isArray(s))return s.filter(r=>r&&Array.isArray(r.p)&&r.p.length===2&&r.p.every(Number.isFinite)&&ST.includes(r.s))
+   .map(r=>({c:String(r.c||'Other'),d:String(r.d||''),p:r.p,s:r.s,t:r.t||null,img:typeof r.img==='string'&&r.img.startsWith('data:image/')?r.img:null}))}catch(e){}
+ return SEED.map(r=>({...r}))}
+function saveReports(){
+ try{localStorage.setItem(KEY,JSON.stringify(reports));return true}catch(e){}
+ /* storage full (usually photos): keep the reports, drop the pictures */
+ try{localStorage.setItem(KEY,JSON.stringify(reports.map(r=>({...r,img:null}))));return false}catch(e){return false}}
+/* Photos are shrunk to a small JPEG so they fit in browser storage. */
+function shrink(file,max=640){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(im.src);ok(c.toDataURL('image/jpeg',.7))};im.onerror=()=>no(new Error('unreadable image'));im.src=URL.createObjectURL(file)})}
+let reports=loadReports();
+let sel='A',pin=null,pinMode=false,pinMk=null,fs=0,fa=0;
+function inside(p,pl){let x=p[1],y=p[0],c=false;for(let i=0,j=pl.length-1;i<pl.length;j=i++){const xi=pl[i][1],yi=pl[i][0],xj=pl[j][1],yj=pl[j][0];if((yi>y)!=(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c}
+const zoneOf=p=>Z.find(z=>inside(p,z.poly));
+function vals(z,adj){const n=reports.filter(r=>r.s!=='Resolved'&&inside(r.p,z.poly)).length;const v={...z.v,rep:Math.min(100,n*REP_PTS)};if(adj){v.veg=Math.min(100,v.veg+1.2*fs+.8*fa);v.settle=Math.min(100,v.settle+1.5*fs)}return v}
+function calc(v){const parts=Object.keys(W).map(k=>({k,val:v[k],c:W[k]*v[k]}));return{t:parts.reduce((a,p)=>a+p.c,0),parts}}
+function action(v,parts){if(v.water>=80)return ACT.water;const top=[...parts].filter(p=>p.k!=='water').sort((a,b)=>b.c-a.c)[0];return ACT[top.k]}
+/* "How scores work": built from W and LBL so the explanation can never drift from the calculation. */
+$('#howbody').innerHTML=`<p>Every zone gets a priority score from 0 to 100. Six factors are each rated 0 to 100, multiplied by their weight, and added together. A higher score means act sooner.</p>
+<table><tr><th>Factor</th><th>Weight</th></tr>${Object.keys(W).map(k=>`<tr><td>${LBL[k]}</td><td>${Math.round(W[k]*100)}%</td></tr>`).join('')}</table>
+<div class="formula">score = ${Object.keys(W).map(k=>W[k].toFixed(2)+' × '+LBL[k].toLowerCase()).join(' + ')}</div>
+<p><b>Levels:</b> 70 or more is Critical, 50 to 69 is High, 30 to 49 is Moderate, below 30 is Low.</p>
+<p><b>Community reports:</b> each report in the zone that is not yet Resolved adds ${REP_PTS} to the reports factor, up to 100. Resolving a report removes its points.</p>
+<p><b>Recommended action:</b> if water-supply importance is 80 or more, the action is to protect the water source. Otherwise it follows the factor adding the most points.</p>
+<p><b>What-if:</b> each 1% of forest converted to settlement adds 1.2 to vegetation loss and 1.5 to settlement growth; each 1% converted to agriculture adds 0.8 to vegetation loss. The zone is then rescored.</p>
+<p class="mut">Zone ratings are sample data, and the weights are a starting point for the LGU to review. They are not official values.</p>`;
+const map=L.map('map').fitBounds([[11.29,125.0],[11.48,125.23]]);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'&copy; OpenStreetMap'}).addTo(map);
+const layers={};Z.forEach(z=>{layers[z.id]=L.polygon(z.poly,{weight:2,color:'#fff',fillOpacity:.55}).addTo(map).on('click',()=>{if(pinMode)return;sel=z.id;render()}).bindTooltip('Zone '+z.id,{permanent:true,direction:'center'})});
+const rl=L.layerGroup().addTo(map);
+map.on('click',e=>{if(!pinMode)return;pin=[e.latlng.lat,e.latlng.lng];if(pinMk)pinMk.remove();pinMk=L.marker(e.latlng).addTo(map);pinMode=false;$('#pinbtn').textContent='Location set (tap to change)';$('#msg').textContent=''});
+$('#pinbtn').onclick=()=>{pinMode=true;$('#pinbtn').textContent='Click the map to place the pin';};
+$('#send').onclick=async()=>{
+ if(!pin){$('#msg').textContent='Pin the location on the map first.';return}
+ const f=$('#photo').files[0];let img=null,photoFailed=false;
+ if(f){try{img=await shrink(f)}catch(e){photoFailed=true}}
+ const at=pin;
+ reports.unshift({c:$('#cat').value,d:$('#desc').value.trim()||'No description',p:at,s:'Submitted',t:Date.now(),img});
+ const kept=saveReports();
+ const z=zoneOf(at);if(z)sel=z.id;
+ if(pinMk){pinMk.remove();pinMk=null}pin=null;$('#desc').value='';$('#photo').value='';$('#pinbtn').textContent='Pin location on map';
+ $('#msg').textContent=(z?'Report sent. Zone '+z.id+' score updated.':'Report sent (outside mapped zones).')+(photoFailed?' The photo could not be read and was left out.':'')+(kept?'':' Browser storage is full, so photos will not survive a refresh.');render()};
+$('#reset').onclick=()=>{if(!confirm('Replace all reports with the sample reports?'))return;reports=SEED.map(r=>({...r}));saveReports();$('#msg').textContent='';render()};
+function render(){
+ const rows=Z.map(z=>{const v=vals(z),c=calc(v);return{z,v,...c,l:lv(c.t)}}).sort((a,b)=>b.t-a.t);
+ rows.forEach(r=>layers[r.z.id].setStyle({fillColor:COL[r.l],weight:r.z.id===sel?4:2,color:r.z.id===sel?'#102a33':'#fff'}));
+ $('#recs').innerHTML=rows.map(r=>{const a=action(r.v,r.parts);return`<div class="rec ${r.z.id===sel?'on':''}" data-z="${r.z.id}" tabindex="0" role="button"><div class="sc" style="background:${COL[r.l]}">${Math.round(r.t)}</div><div><b>${r.z.name}</b><span>${r.l}: ${a[0]}. ${a[1]}</span></div></div>`}).join('');
+ document.querySelectorAll('.rec').forEach(e=>{const go=()=>{sel=e.dataset.z;render();map.fitBounds(layers[sel].getBounds(),{maxZoom:12})};e.onclick=go;e.onkeydown=k=>{if(k.key==='Enter')go()}});
+ const R=rows.find(r=>r.z.id===sel),z=R.z,ps=[...R.parts].sort((a,b)=>b.c-a.c),a=action(R.v,R.parts);
+ $('#detail').innerHTML=`<h2>Zone ${z.id}: ${z.name}</h2><div class="big" style="color:${COL[R.l]}">${Math.round(R.t)}<small>${R.l}</small></div>
+ <p class="mut" style="margin:10px 0 4px">Why is this area ${R.l.toLowerCase()}? Each factor adds points to the score.</p>`+
+ ps.map(p=>`<div class="row"><span>${LBL[p.k]} <em>${Math.round(p.val)}</em></span><div class="bar"><i style="width:${p.c/25*100}%"></i></div><b>+${p.c.toFixed(1)}</b></div>`).join('')+
+ `<h2 style="margin-top:14px">Who uses this area?</h2><div class="stack">${z.lu.map((p,i)=>`<i style="width:${p}%;background:${LC[i]}"></i>`).join('')}</div><div class="lg">${z.lu.map((p,i)=>`<span><b style="background:${LC[i]}"></b>${LN[i]} ${p}%</span>`).join('')}</div>`+
+ (z.prop?`<div class="warn"><b>Proposed:</b> ${z.prop}<br>Conflict: ${z.conf}</div>`:'<p class="mut">No proposed development or land-use conflict on record.</p>')+
+ `<h2 style="margin-top:14px">Recommended action</h2><p style="margin:0">${a[0]}<br><span class="mut">Responsible: ${a[1]}</span></p>`;
+ $('#wizone').textContent='Testing Zone '+z.id+': '+z.name;wi();
+ rl.clearLayers();reports.forEach(r=>L.circleMarker(r.p,{radius:7,color:'#fff',weight:2,fillOpacity:1,fillColor:r.s==='Resolved'?'#8a9aa0':'#102a33'}).bindPopup(esc(r.c)+': '+esc(r.d)+' ('+r.s+')').addTo(rl));
+ $('#rlist').innerHTML=reports.length?reports.map((r,i)=>{const zz=zoneOf(r.p),n=ST.indexOf(r.s);return`<div class="rp"><b>${esc(r.c)}</b> <span class="mut">${zz?'Zone '+zz.id:'Outside zones'}${r.t?' · '+new Date(r.t).toLocaleDateString():''}</span><br>${esc(r.d)}${r.img?`<img src="${esc(r.img)}" alt="Report photo">`:''}<span class="pill">${r.s}</span>${n<4?` <a href="#" data-i="${i}" class="adv">Move to ${ST[n+1]}</a>`:''}</div>`}).join(''):'<p class="mut">No reports yet. Use the form to send the first one.</p>';
+ document.querySelectorAll('.adv').forEach(e=>e.onclick=ev=>{ev.preventDefault();const r=reports[e.dataset.i];r.s=ST[ST.indexOf(r.s)+1];saveReports();render()})}
+function wi(){const z=Z.find(x=>x.id===sel),b=vals(z),n=vals(z,true),sb=calc(b).t,sn=calc(n).t;
+ const f={'Runoff risk':v=>v.veg*.5+v.slope*.3+v.settle*.2,'Erosion risk':v=>v.slope*.5+v.veg*.5,'Water source pressure':v=>v.water*.5+v.settle*.5};
+ const row=(k,x,y,bad,arrow='↑')=>`<tr><td>${k}</td><td>${x}</td><td style="color:${bad?'#c0392b':'inherit'}"><b>${y}${bad?' '+arrow:''}</b></td></tr>`;
+ const hb=Math.round(100-sb),hn=Math.round(100-sn);
+ $('#wiout').innerHTML=`<table><tr><th></th><th>Now</th><th>After</th></tr>`+row('Watershed health',hb+' '+hl(hb),hn+' '+hl(hn),hn<hb,'↓')+Object.keys(f).map(k=>{const x=ind(f[k](b)),y=ind(f[k](n));return row(k,x,y,f[k](n)>f[k](b)+.5)}).join('')+`</table><p class="mut">Illustrative rules, not a hydrological model. Compare the same zone before and after.</p>`}
+$('#fs').oninput=e=>{fs=+e.target.value;$('#fsv').textContent=fs;render()};
+$('#fa').oninput=e=>{fa=+e.target.value;$('#fav').textContent=fa;render()};
+render();
+</script></body></html>
