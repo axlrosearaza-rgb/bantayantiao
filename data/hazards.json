@@ -1,0 +1,183 @@
+{
+ "meta": {
+  "processed": "2026-10-06",
+  "noah": {
+   "publisher": "UP Resilience Institute, NOAH Center (Project NOAH)",
+   "website": "https://noah.up.edu.ph/",
+   "license": "Open Data Commons Open Database License (ODbL) 1.0",
+   "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+   "retrieved_from": "BetterGov.ph public mirror of the NOAH downloads (Hugging Face: bettergovph/project-noah-hazard-maps)",
+   "retrieved_url": "https://huggingface.co/datasets/bettergovph/project-noah-hazard-maps",
+   "source_files_dated": "2021",
+   "processing": "Rasterised to 0.0001 degree cells (about 11 m) and clipped to Catbalogan City (reference outline: OpenStreetMap city boundary inland, PSGC barangay outlines on the coast) and the whole Antiao Watershed; the percentages count cells inside the barangay outlines. No class values were changed."
+  },
+  "boundaries": {
+   "source": "faeldon/philippines-json-maps (PSGC 4Q 2023, derived from PSA / NAMRIA shapefiles)",
+   "url": "https://github.com/faeldon/philippines-json-maps",
+   "note": "Indicative barangay boundaries, not survey-grade."
+  }
+ },
+ "grid": {
+  "west": 124.67253000000001,
+  "south": 11.68316,
+  "east": 124.97123,
+  "north": 11.92116,
+  "width": 2987,
+  "height": 2380,
+  "cell": 0.0001
+ },
+ "pieces": [
+  {
+   "west": 124.67253,
+   "north": 11.92116,
+   "east": 124.80473,
+   "south": 11.86736
+  },
+  {
+   "west": 124.80473,
+   "north": 11.92116,
+   "east": 124.97123,
+   "south": 11.86736
+  },
+  {
+   "west": 124.67253,
+   "north": 11.86736,
+   "east": 124.80473,
+   "south": 11.68316
+  },
+  {
+   "west": 124.80473,
+   "north": 11.86736,
+   "east": 124.97123,
+   "south": 11.68316
+  }
+ ],
+ "layers": {
+  "flood": {
+   "label": "Flood hazard (100-year rain return)",
+   "short": "Flood",
+   "classes": [
+    {
+     "cls": 1,
+     "name": "Low",
+     "note": "Flood depth up to 0.5 m",
+     "color": [
+      242,
+      201,
+      76
+     ]
+    },
+    {
+     "cls": 2,
+     "name": "Medium",
+     "note": "Flood depth above 0.5 m, up to 1.5 m",
+     "color": [
+      242,
+      153,
+      74
+     ]
+    },
+    {
+     "cls": 3,
+     "name": "High",
+     "note": "Flood depth above 1.5 m",
+     "color": [
+      235,
+      87,
+      87
+     ]
+    }
+   ]
+  },
+  "landslide": {
+   "label": "Landslide hazard",
+   "short": "Landslide",
+   "classes": [
+    {
+     "cls": 1,
+     "name": "Low",
+     "note": "Build only with continuous monitoring",
+     "color": [
+      242,
+      201,
+      76
+     ]
+    },
+    {
+     "cls": 2,
+     "name": "Medium",
+     "note": "Build only with slope protection and intervention; continuous monitoring",
+     "color": [
+      242,
+      153,
+      74
+     ]
+    },
+    {
+     "cls": 3,
+     "name": "High",
+     "note": "No dwelling zone",
+     "color": [
+      235,
+      87,
+      87
+     ]
+    }
+   ]
+  },
+  "stormsurge": {
+   "label": "Storm surge hazard (advisory 4, surge above 4 m)",
+   "short": "Storm surge",
+   "classes": [
+    {
+     "cls": 1,
+     "name": "Low",
+     "note": "Inundation depth 0.2 m to 0.5 m",
+     "color": [
+      242,
+      201,
+      76
+     ]
+    },
+    {
+     "cls": 2,
+     "name": "Medium",
+     "note": "Inundation depth 0.5 m to 1.5 m",
+     "color": [
+      242,
+      153,
+      74
+     ]
+    },
+    {
+     "cls": 3,
+     "name": "High",
+     "note": "Inundation depth above 1.5 m",
+     "color": [
+      235,
+      87,
+      87
+     ]
+    }
+   ]
+  }
+ },
+ "watershed": {
+  "cells": 1403676,
+  "flood": [
+   1,
+   4.4,
+   7.6
+  ],
+  "landslide": [
+   10.2,
+   38.5,
+   21.3
+  ],
+  "stormsurge": [
+   0.1,
+   0.3,
+   1.8
+  ]
+ }
+}

@@ -1,0 +1,12 @@
+/* ---------- pin map (3D hazard map for choosing a place) ---------- */
+.pinmap{position:relative;height:100%;width:100%}
+.pinmap-gl{position:absolute;inset:0}
+.pinmap-gl .maplibregl-canvas{cursor:crosshair}
+.pinmap .maplibregl-marker{cursor:grab}
+.pinmap-loading{position:absolute;inset:0;z-index:3;display:grid;place-items:center;background:linear-gradient(160deg,#eef7f3,#e3f1fa);color:#1f6045;font-weight:600;font-size:.95rem}
+.pinmap-legend{position:absolute;left:10px;top:10px;z-index:2;display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;background:rgb(255 255 255/.94);box-shadow:0 1px 6px rgb(0 0 0/.22);font-size:.78rem;color:#1f2937;}
+.pinmap-legend span{display:inline-flex;align-items:center;gap:5px}
+.pinmap-legend i{width:14px;height:14px;border-radius:3px;display:block}
+@media (max-width:520px){.pinmap-legend b{display:none}}
+.pinmap-legend label{display:inline-flex;align-items:center;gap:6px;font-weight:600;cursor:pointer}
+.pinmap-legend input{width:15px;height:15px;accent-color:#1a73e8}

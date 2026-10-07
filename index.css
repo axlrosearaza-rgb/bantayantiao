@@ -1,0 +1,151 @@
+@import 'tailwindcss';
+
+/* One look for the whole system: the landing page's forest green, river blue, mint and white,
+   Bricolage Grotesque for headings and Source Sans 3 for text (the same tokens as .site in pages/site.css). */
+@theme {
+  --color-brand-50: #e9f5ef;
+  --color-brand-100: #d7e7df;
+  --color-brand-500: #2f7d5b;
+  --color-brand-600: #1f6045;
+  --color-brand-700: #194f39;
+  --color-brand-900: #1f6045;
+  --color-forest: #1f6045;
+  --color-leaf: #2f7d5b;
+  --color-mint: #e9f5ef;
+  --color-river: #1f78c8;
+  --color-ink: #10291f;
+  --color-moss: #3c5a4d;
+  --color-line: #d7e7df;
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Archivo', system-ui, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  background: #f6faf8;
+  color: #10291f;
+  -webkit-font-smoothing: antialiased;
+}
+input[type='range'],
+input[type='checkbox'] {
+  accent-color: #2f7d5b;
+}
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #1f78c8;
+  outline-offset: 2px;
+}
+
+/* signed-in pages: headings in the display face, like the landing page (the 3D map panel keeps its own type) */
+.app-shell :where(h1, h2):not(.kyh *) {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* ---- Leaflet tweaks ---- */
+.leaflet-container {
+  font-family: inherit;
+  background: #dfe9e6;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+}
+.leaflet-popup-content {
+  margin: 12px 14px;
+  min-width: 210px;
+}
+.bu-tip {
+  border: 0;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
+}
+
+/* ---- Report markers: icon = category, ring = verification state ---- */
+.bu-pin {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px var(--ring, solid) var(--c, #64748b);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  line-height: 1;
+}
+.bu-pin.is-muted {
+  opacity: 0.6;
+  filter: grayscale(0.8);
+}
+.bu-pin.is-new {
+  animation: bu-pulse 1.6s ease-out 3;
+}
+.bu-pin .bu-badge {
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--c);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #fff;
+}
+@keyframes bu-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(31 122 109 / 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 22px rgb(31 122 109 / 0);
+  }
+}
+.bu-drop {
+  font-size: 30px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.4));
+}
+@media (prefers-reduced-motion: reduce) {
+  .bu-pin.is-new {
+    animation: none;
+  }
+}
+
+/* NOAH hazard rasters: keep cell edges crisp when zoomed in */
+.bu-hazard {
+  image-rendering: pixelated;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Mapbox wordmark, shown only when Mapbox tiles are in use */
+.mapbox-mark {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  z-index: 500;
+  font: 700 15px/1 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-shadow: 0 0 3px rgb(0 0 0 / 0.75), 0 1px 2px rgb(0 0 0 / 0.6);
+  text-decoration: none;
+}
