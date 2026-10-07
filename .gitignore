@@ -3,3 +3,6 @@ dist
 .env
 .env.local
 scripts/.cache
+
+.vercel
+.env*
